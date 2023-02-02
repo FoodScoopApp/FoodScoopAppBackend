@@ -7,6 +7,7 @@ Dependencies:
 - Node.js version ^19.x.x
 - npm version ^9.x.x
 - MongoDB version ^6.x.x
+- Other dependencies highlighted in `package.json`
 
 Build Script:
 ```sh
