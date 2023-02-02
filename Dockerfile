@@ -3,9 +3,9 @@ FROM keymetrics/pm2:latest-alpine
 
 WORKDIR src
 
-COPY *.ts .
-COPY *.json .
-COPY ecosystem.config.js .
+COPY *.ts ./
+COPY *.json ./
+COPY ecosystem.config.js ./
 
 # Install app dependencies
 ENV NPM_CONFIG_LOGLEVEL warn
