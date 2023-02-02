@@ -13,6 +13,7 @@ Dependencies:
 Build Script:
 ```sh
 $ npm i
+$ npm install typescript
 $ npm run build
 
 # Python Scraping tool
