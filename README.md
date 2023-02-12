@@ -15,6 +15,7 @@ A Node.js backend for FoodScoop: A new dining experience
 Note: make sure to clone this repository with `--recurse-submodules`.
 
 ```sh
+$ cp configtemplate.ts config.ts
 $ npm i
 $ npx ttsc
 $ npm run build
@@ -26,7 +27,7 @@ $ source venv/bin/activate
 $ pip install -r requirements.txt
 ```
 
-In addition, duplicate the file `configtemplate.ts` to `config.ts` and add any variables as needed. (MongoDB URI?)
+In addition, duplicate the file (done in command 1) `configtemplate.ts` to `config.ts` and add any variables as needed. (MongoDB URI?)
 
 ## Run Application
 ```sh
