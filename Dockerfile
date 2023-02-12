@@ -10,6 +10,7 @@ COPY ecosystem.config.js ./
 # Install app dependencies
 ENV NPM_CONFIG_LOGLEVEL warn
 RUN npm i
+RUN npx ttsc
 RUN npm run build
 
 # Expose the listening port of your app
