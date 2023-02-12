@@ -1,16 +1,19 @@
-import config from './config'
+import "./models";
+import config from "./config";
+import { defineRoutes } from "./routes";
 
-import express from 'express';
+import express from "express";
+import mongoose from "mongoose";
 
-const app = express()
+const app = express();
+main().catch(err => console.log(err));
 
-app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
+defineRoutes(app);
 
-app.listen(config.PORT, () => {
-    console.log(`Example app listening on port ${config.PORT}`)
-})
+async function main() {
+  await mongoose.connect(config.MONGOURI);
 
-
-
+  app.listen(config.PORT, () => {
+    console.log(`FoodScoop listening on port ${config.PORT}`);
+  });
+}
