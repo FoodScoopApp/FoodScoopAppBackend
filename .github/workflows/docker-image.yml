@@ -16,5 +16,7 @@ jobs:
     - id: commit
       uses: pr-mpt/actions-commit-hash@v2
     - uses: actions/checkout@v3
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag foodscoopbackend:${{ steps.commit.outputs.short }}
