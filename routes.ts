@@ -1,7 +1,7 @@
 import { User } from "./models";
 
 import { Express } from "express";
-import { is } from "typescript-is";
+import { is } from "typia";
 
 const BASEROUTE = "/api/v1/";
 
@@ -11,10 +11,10 @@ export const defineRoutes = (app: Express) => {
   const routeBuilder = (
     type: method,
     endpoint: Endpoint,
-    callback: (req: any) => Promise<{ resp: Resp; code: number }>,
+    callback: (req: any, currentUser?: string) => Promise<{ resp: Resp; code: number }>,
     authRequired?: boolean
   ) => {
-    let currentUser: string | null;
+    let currentUser: string | undefined;
     app[type](route(endpoint), async (req, res) => {
       if (authRequired) {
         let resp: Resp = { error: "Unauthorized" };
@@ -46,9 +46,11 @@ export const defineRoutes = (app: Express) => {
         }
       }
       try {
-        const requ = JSON.parse(req.read());
-        requ.currentUser = currentUser;
-        const resp = await callback(requ);
+        let requ: any = {};
+        const data = req.read();
+        if (data) requ = JSON.parse(data);
+        else requ = req.query;
+        const resp = await callback(requ, currentUser);
         res.status(resp.code).type("application/json").send(resp.resp);
       } catch {
         const resp: ErrorResp = { error: "BadRequest" };
@@ -58,7 +60,6 @@ export const defineRoutes = (app: Express) => {
   };
 
   // Routes
-
   routeBuilder("get", "userexists", async (req) => {
     if (!is<CheckUserExistsReq>(req))
       return { resp: { error: "BadRequest" }, code: 400 };

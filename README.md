@@ -25,6 +25,8 @@ $ source venv/bin/activate
 $ pip install -r requirements.txt
 ```
 
+In addition, duplicate the file `configtemplate.ts` to `config.ts` and add any variables as needed. (MongoDB URI?)
+
 ## Run Application
 ```sh
 $ npm run run
