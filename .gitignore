@@ -2,3 +2,5 @@
 build
 node_modules
 scraping/venv
+scraping/sample.json
+config.ts

@@ -1,0 +1,4 @@
+
+[submodule "FoodScoopAppTypes"]
+	path = FoodScoopAppTypes
+	url = git@github.com:/FoodScoopApp/FoodScoopAppTypes

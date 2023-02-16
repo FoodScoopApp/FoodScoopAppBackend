@@ -3,19 +3,17 @@ FROM keymetrics/pm2:latest-alpine
 
 WORKDIR src
 
-COPY *.ts ./
-COPY *.json ./
-COPY ecosystem.config.js ./
+COPY . /src
 
 # Install app dependencies
 ENV NPM_CONFIG_LOGLEVEL warn
+
+RUN cp configtemplate.ts config.ts
 RUN npm i
+RUN npx ttsc
 RUN npm run build
 
 # Expose the listening port of your app
 EXPOSE 8080
-
-# Show current folder structure in logs
-RUN ls -al -R
 
 CMD [ "pm2-runtime", "start", "ecosystem.config.js" ]
