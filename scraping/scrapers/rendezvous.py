@@ -1,6 +1,5 @@
 import requests
 import re
-from datetime import date, timedelta
 from bs4 import BeautifulSoup
 from .utils import *
 
@@ -16,34 +15,34 @@ def scrape_rendezvous():
     for i in div.find_all(class_="menu-item"):
         meal_list.append(build_menu_item(i,"Rendezvous West",["lunch","dinner"],""))
 
-    monday = date.today()
-    if monday.weekday()<5:
-        monday -= timedelta(monday.weekday())
-    else:
-        monday += timedelta(7-monday.weekday())
-    tuesday = monday+timedelta(1)
-    wednesday = monday+timedelta(2)
-    thursday = monday+timedelta(3)
-    friday = monday+timedelta(4)
-    days = zip(["Monday","Tuesday","Wednesday","Thursday","Friday"],
-               [monday,tuesday,wednesday,thursday,friday])
-
     west = rende.find(string=re.compile("SLIDE: WEST")).parent
     east = rende.find(string=re.compile("SLIDE: EAST")).parent
 
-    for (day, dateObject) in days:
+    # West
+    for (day, dateObject) in weekdays.items():
         div = west.find("h4", string=day+':').parent
         for i in div.find_all(class_="menu-item"):
             meal_list.append(build_menu_item(i,"Rendezvous West",["lunch","dinner"],
                                              dateObject.strftime('%Y-%m-%d')))
-
-    saturday = monday+timedelta(5)
-    sunday = monday+timedelta(6)
     for i in west.find("h4", string="Saturday & Sunday:").parent.find_all(class_="menu-item"):
         meal_list.append(build_menu_item(i,"Rendezvous West",["lunch","dinner"],
                                          saturday.strftime('%Y-%m-%d')))
         meal_list.append(build_menu_item(i,"Rendezvous West",["lunch","dinner"],
                                          sunday.strftime('%Y-%m-%d')))
 
+    # East
+    for (day, dateObject) in weekdays.items():
+        div = east.find("h4", string=day+':').parent
+        for i in div.find_all(class_="menu-item"):
+            meal_list.append(build_menu_item(i,"Rendezvous East",["dinner"],
+                                             dateObject.strftime('%Y-%m-%d')))
+    for i in east.find("h4", string="Saturday & Sunday (All Day):").parent.find_all(class_="menu-item"):
+        for (day, dateObject) in weekends.items():
+            meal_list.append(build_menu_item(i,"Rendezvous East",["lunch","dinner"],
+                                             dateObject.strftime('%Y-%m-%d')))
+    for i in east.find("h2", string="Weekday Lunch Specials").parent.find_all(class_="menu-item"):
+        for (day, dateObject) in weekdays.items():
+            meal_list.append(build_menu_item(i,"Rendezvous East",["lunch"],
+                                             dateObject.strftime("%Y-%m-%d")))
     return meal_list
 
