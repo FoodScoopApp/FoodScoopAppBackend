@@ -15,6 +15,15 @@ jobs:
     steps:
     - id: commit
       uses: pr-mpt/actions-commit-hash@v2
+    - name: Write Secret File
+      # You may pin to the exact commit or the version.
+      # uses: joutvhu/write-file@a8e410d0ae67d9560c8c42880de54dbf2323d081
+      uses: joutvhu/write-file@v1.0.2
+      with:
+        # The path to the file to write.
+        path: './config.ts'
+        # The contents of the file
+        contents: '${{ secrets.CONFIG_DEV }}'
     - name: Install SSH key
       uses: shimataro/ssh-key-action@v2
       with:
