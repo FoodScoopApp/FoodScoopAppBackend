@@ -79,7 +79,7 @@ jobs:
         uses: joutvhu/write-file@v1.0.2
         with:
           # The path to the file to write.
-          path: 'config.ts'
+          path: './test.test'
           # The contents of the file
           contents: '${{ secrets.CONFIG_DEV }}'
       - name: Google Auth
