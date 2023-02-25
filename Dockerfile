@@ -8,7 +8,6 @@ COPY . /src
 # Install app dependencies
 ENV NPM_CONFIG_LOGLEVEL warn
 
-RUN cp configtemplate.ts config.ts
 RUN npm i
 RUN npx ttsc
 RUN npm run build
