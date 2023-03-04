@@ -1,3 +1,5 @@
+import requests
+from bs4 import BeautifulSoup
 from datetime import date, timedelta
 
 PARSER = "html.parser"
@@ -33,7 +35,27 @@ def build_menu_item(menu_item, dining_hall, meal_period, date):
     description = menu_item.find(class_="menu-item-description")
     if description != None: description = description.text.strip()
 
-    return {"name": name, "diningHall": dining_hall, "meal_period": meal_period,
+    recipe_url = menu_item.find("a", class_="recipelink")['href']
+
+    recipe_page = requests.get(str(recipe_url)).text
+    soup = BeautifulSoup(recipe_page, PARSER)
+
+    ingredients = soup.find("strong", string="INGREDIENTS:")
+    calories = None
+    sodium = None
+    protein = None
+    if ingredients != None and soup.find(class_="nf-blur") == None:
+        #ingredients = str(ingredients.next_sibling)[1:].split(', ')
+        ingredients = str(ingredients.next_sibling)[1:]
+        calories = float(soup.find("span", class_="nfcaltxt").next_sibling)
+        sodium = soup.find("span", class_="nfmajornutrient", string="Sodium")
+        sodium = float(str(sodium.next_sibling)[:-3])
+        protein = soup.find("span", class_="nfmajornutrient", string="Protein")
+        protein = float(str(protein.next_sibling)[:-2])
+    else: ingredients = None
+
+    return {"name": name, "diningHall": dining_hall, "mealPeriod": meal_period,
             "date": date, "restrictions": restrictions, "price": price,
-            "description": description}
+            "description": description, "ingredients": ingredients,
+            "calories": calories, "sodium": sodium, "protein": protein}
 
