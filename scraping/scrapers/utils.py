@@ -22,7 +22,7 @@ weekdays = dict(zip(["Monday","Tuesday","Wednesday","Thursday","Friday"],
                     [monday,tuesday,wednesday,thursday,friday]))
 weekends = dict(zip(["Saturday","Sunday"],[saturday,sunday]))
 
-def build_menu_item(menu_item, dining_hall, meal_period, date):
+def build_menu_item(menu_item, dining_hall = "", meal_period = [], date = "", subcategory = None):
     name = menu_item.find("a",class_="recipelink").text
 
     restrictions = {i:False for i in FOOD_RESTRICTIONS}
@@ -38,6 +38,7 @@ def build_menu_item(menu_item, dining_hall, meal_period, date):
     recipe_url = menu_item.find("a", class_="recipelink")['href']
 
     recipe_page = requests.get(str(recipe_url)).text
+    [meal_id, serving_size] = str(recipe_url).split('/')[-2:]
     soup = BeautifulSoup(recipe_page, PARSER)
 
     ingredients = soup.find("strong", string="INGREDIENTS:")
@@ -54,8 +55,20 @@ def build_menu_item(menu_item, dining_hall, meal_period, date):
         protein = float(str(protein.next_sibling)[:-2])
     else: ingredients = None
 
-    return {"name": name, "diningHall": dining_hall, "mealPeriod": meal_period,
-            "date": date, "restrictions": restrictions, "price": price,
-            "description": description, "ingredients": ingredients,
-            "calories": calories, "sodium": sodium, "protein": protein}
+    return {
+                "name": name,
+                "mealID": meal_id,
+                "servingSize": serving_size,
+                "diningHall": dining_hall,
+                "subcategory": subcategory,
+                "mealPeriod": meal_period,
+                "date": date,
+                "restrictions": restrictions,
+                "price": price,
+                "description": description,
+                "ingredients": ingredients,
+                "calories": calories,
+                "sodium": sodium,
+                "protein": protein
+            }
 

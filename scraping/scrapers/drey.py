@@ -1,9 +1,10 @@
+import sys
 import requests
 from bs4 import BeautifulSoup
 from .utils import *
 
 def scrape_drey():
-    print("Scraping 'The Drey'...")
+    print("Scraping 'The Drey'...", file=sys.stderr)
     meal_list = []
     drey_url = "http://menu.dining.ucla.edu/Menus/Drey"
     drey_page = requests.get(drey_url).text
