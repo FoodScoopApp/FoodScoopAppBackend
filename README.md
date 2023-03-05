@@ -8,7 +8,7 @@ A Node.js backend for FoodScoop: A new dining experience
 - npm version ^9.x.x
 - MongoDB version ^6.x.x
 - Python ^3.10 (including pip)
-- Other dependen0cies highlighted in `package.json` and `scraping/requirements.txt`
+- Other dependencies highlighted in `package.json` and `scraping/requirements.txt`
 
 ### Build Script:
 
@@ -18,7 +18,6 @@ Note: make sure to clone this repository with `--recurse-submodules`.
 $ cp configtemplate.ts config.ts
 $ npm i
 $ npx ttsc
-$ npm run build
 
 # Python Scraping tool
 $ cd scraping

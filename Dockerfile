@@ -10,7 +10,6 @@ ENV NPM_CONFIG_LOGLEVEL warn
 
 RUN npm i
 RUN npx ttsc
-RUN npm run build
 
 # Expose the listening port of your app
 EXPOSE 8080
