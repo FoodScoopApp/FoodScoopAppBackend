@@ -1,9 +1,10 @@
+import sys
 import requests
 from bs4 import BeautifulSoup
 from .utils import *
 
 def scrape_bcafe():
-    print("Scraping 'Bruin Café'...")
+    print("Scraping 'Bruin Café'...", file=sys.stderr)
     meal_list = []
     bcafe_url = "http://menu.dining.ucla.edu/Menus/BruinCafe"
     bcafe_page = requests.get(bcafe_url).text

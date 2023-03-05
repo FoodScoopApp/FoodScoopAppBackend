@@ -1,3 +1,4 @@
+import sys
 import requests
 import re
 import json
@@ -19,7 +20,7 @@ data.extend(scrape_bcafe())
 data.extend(scrape_drey())
 data.extend(scrape_epic_ackerman())
 
-file = open("sample.json", "w")
-json.dump(data, file, indent=4)
-file.close()
-print("Done")
+#file = open("sample.json", "w")
+json.dump(data, sys.stdout, indent=4)
+#file.close()
+print("\nDone", file=sys.stderr)

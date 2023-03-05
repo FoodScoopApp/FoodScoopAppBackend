@@ -1,9 +1,10 @@
+import sys
 import requests
 from bs4 import BeautifulSoup
 from .utils import *
 
 def scrape_residential(date):
-    print("Scraping residential restaurants...")
+    print("Scraping residential restaurants...", file=sys.stderr)
     meal_list = []
     breakfast_url = "http://menu.dining.ucla.edu/Menus/"+date+"/Breakfast"
     lunch_url = "https://menu.dining.ucla.edu/Menus/"+date+"/Lunch"
@@ -21,7 +22,8 @@ def scrape_residential(date):
             if div is None: continue
             div = div.parent.parent
             for i in div.find_all(class_="menu-item"):
-                meal_list.append(build_menu_item(i,restaurant,meal_period,date))
+                subcategory = i.parent.previous_sibling.strip()
+                meal_list.append(build_menu_item(i,restaurant,meal_period,date,subcategory))
 
     return meal_list
 

@@ -1,9 +1,10 @@
+import sys
 import requests
 from bs4 import BeautifulSoup
 from .utils import *
 
 def scrape_study():
-    print("Scraping 'The Study'...")
+    print("Scraping 'The Study'...", file=sys.stderr)
     meal_list = []
     study_url = "http://menu.dining.ucla.edu/Menus/HedrickStudy"
     study_page = requests.get(study_url).text

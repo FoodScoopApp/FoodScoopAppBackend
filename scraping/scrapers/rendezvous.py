@@ -1,10 +1,11 @@
+import sys
 import requests
 import re
 from bs4 import BeautifulSoup
 from .utils import *
 
 def scrape_rendezvous():
-    print("Scraping 'Rendezvous'...")
+    print("Scraping 'Rendezvous'...", file=sys.stderr)
     meal_list = []
     rende_url = "http://menu.dining.ucla.edu/Menus/Rendezvous"
     rende_page = requests.get(rende_url).text

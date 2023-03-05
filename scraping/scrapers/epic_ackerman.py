@@ -1,9 +1,10 @@
+import sys
 import requests
 from bs4 import BeautifulSoup
 from .utils import *
 
 def scrape_epic_ackerman():
-    print("Scraping 'Epic at Ackerman'...")
+    print("Scraping 'Epic at Ackerman'...", file=sys.stderr)
     meal_list = []
     epic_url = "http://menu.dining.ucla.edu/Menus/EpicAtAckerman"
     epic_page = requests.get(epic_url).text
