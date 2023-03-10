@@ -11,16 +11,16 @@ def scrape_bcafe():
     bcafe = BeautifulSoup(bcafe_page, PARSER)
 
     for (day, dateObject) in weekdays.items():
-        div = bcafe.find("h4", string=day+':').parent;
+        div = bcafe.find("h4", string=day+':').parent
         for i in div.find_all(class_="menu-item"):
-            meal_list.append(build_menu_item(i,"Bruin Café",["lunch"],
+            meal_list.append(build_menu_item(i,"BC",["lunch"],
                                              dateObject.strftime('%Y-%m-%d')))
 
     # TODO: fix entree soups special case
     menu_blocks = bcafe.find_all("div", class_="menu-block")[2:]
     for menu_block in menu_blocks:
         for i in menu_block.find_all(class_="menu-item"):
-            meal_list.append(build_menu_item(i,"Bruin Café",["lunch","dinner"],""))
+            meal_list.append(build_menu_item(i,"BC",["lunch","dinner"],""))
         menu_block = menu_block.next_sibling
 
     return meal_list

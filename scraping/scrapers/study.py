@@ -18,7 +18,7 @@ def scrape_study():
         div = study.find("h1", string=category)
         div = div.parent.parent
         for i in div.find_all(class_="menu-item"):
-            meal_list.append(build_menu_item(i,"The Study",meal_period,""))
+            meal_list.append(build_menu_item(i,"SH",meal_period,""))
 
     return meal_list
 

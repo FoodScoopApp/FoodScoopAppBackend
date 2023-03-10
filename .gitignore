@@ -7,3 +7,4 @@ config.ts
 *.pyc
 *.pyo
 *.swp
+package-lock.json

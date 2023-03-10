@@ -11,6 +11,6 @@ def scrape_epic_ackerman():
     epic = BeautifulSoup(epic_page, PARSER)
 
     for i in epic.find_all(class_="menu-item"):
-        meal_list.append(build_menu_item(i,"Epic at Ackerman",["lunch","dinner"],""))
+        meal_list.append(build_menu_item(i,"EA",["lunch","dinner"],""))
 
     return meal_list

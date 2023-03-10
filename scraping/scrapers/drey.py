@@ -11,6 +11,6 @@ def scrape_drey():
     drey = BeautifulSoup(drey_page, PARSER)
 
     for i in drey.find_all(class_="menu-item"):
-        meal_list.append(build_menu_item(i,"The Drey",["lunch","dinner"],""))
+        meal_list.append(build_menu_item(i,"DR",["lunch","dinner"],""))
 
     return meal_list

@@ -23,7 +23,7 @@ def scrape_residential(date):
             div = div.parent.parent
             for i in div.find_all(class_="menu-item"):
                 subcategory = i.parent.previous_sibling.strip()
-                meal_list.append(build_menu_item(i,restaurant,meal_period,date,subcategory))
+                meal_list.append(build_menu_item(i,RES_CONV[restaurant],meal_period,date,subcategory))
 
     return meal_list
 

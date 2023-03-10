@@ -203,7 +203,7 @@ routeBuilder("post", "signin", async (req) => {
 routeBuilder("get", "dininghall", async (req) => {
   if (!is<DiningHallReq>(req)) return badRequestError;
 
-  let dh = await DiningHall.findOne({ name: req.diningHallName });
+  let dh = await DiningHall.findOne({ name: req.diningHallName, date: req.date });
   if (!dh) return { resp: { error: "NotFound" }, code: 404 };
 
   return { resp: { diningHall: dh.toJSON() }, code: 200 };
