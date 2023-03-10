@@ -36,7 +36,7 @@ const mealPeriodStartEndTime: { [name: string]: MealPeriod } = {
 const runPython = () => {
     return new Promise<string>((res, rej) => {
         exec(
-            "cd scraping; source venv/bin/activate; python main.py",
+            "python scraping/main.py",
             { encoding: "utf-8" },
             (err, stdout, stderr) => {
                 if (err) {
