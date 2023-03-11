@@ -3,7 +3,6 @@ import config from "./config";
 import cors from "cors";
 import express, { Express } from "express";
 import mongoose from "mongoose";
-import { runScraper } from "./scraper";
 
 export declare let app: Express;
 app = express();
@@ -20,10 +19,4 @@ async function main() {
   app.listen(config.PORT, () => {
     console.log(`FoodScoop listening on port ${config.PORT}`);
   });
-
-  // Run scraper initially, then hourly
-  runScraper();
-  setInterval(() => {
-    runScraper();
-  }, 60 * 60 * 1000); // Hourly
 }

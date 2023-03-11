@@ -1,5 +1,7 @@
 import { exec } from "child_process";
 import moment from "moment";
+import mongoose from "mongoose";
+import config from "./config";
 import { convertScrapingMealPeriod } from "./FoodScoopAppTypes/converters";
 import { MealPeriod, Subcategory } from "./FoodScoopAppTypes/models";
 
@@ -40,17 +42,17 @@ const runPython = () => {
             { encoding: "utf-8" },
             (err, stdout, stderr) => {
                 if (err) {
-                    rej({err, stderr});
+                    rej({ err, stderr });
                 } else {
                     res(stdout);
                 }
             }
         );
     });
-}
+};
 
 // Run scraper from Python script
-export const runScraper = async () => {
+const runScraper = async () => {
     console.log("Running scraper...");
     try {
         // Attempt to read from Python script's stdout
@@ -88,7 +90,9 @@ export const runScraper = async () => {
                         subcategory: meal.subcategory,
                     });
                 } else {
-                    console.log("Already added meal " + meal.mealID + " to database")
+                    console.log(
+                        "Already added meal " + meal.mealID + " to database"
+                    );
                 }
 
                 // Parse meal to make sure of empty fields
@@ -112,28 +116,47 @@ export const runScraper = async () => {
                 // Find a Dining Hall object in the database that is of the same
                 // name and date
                 let diningHall;
-                const idx = diningHalls.findIndex(d => d.name === meal.diningHall && d.date === meal.date);
+                const idx = diningHalls.findIndex(
+                    (d) => d.name === meal.diningHall && d.date === meal.date
+                );
                 if (idx != -1) {
                     diningHall = diningHalls[idx];
                 }
 
                 // If there is no dining hall, create one
                 if (!diningHall) {
-                    const tempdh = await DiningHall.findOne({ name: meal.diningHall, date: meal.date });
+                    const tempdh = await DiningHall.findOne({
+                        name: meal.diningHall,
+                        date: meal.date,
+                    });
                     if (tempdh) {
-                        console.log("   Already parsed dining hall " + meal.diningHall + " for date " + meal.date);
+                        console.log(
+                            "   Already parsed dining hall " +
+                                meal.diningHall +
+                                " for date " +
+                                meal.date
+                        );
                         continue;
                     }
 
-                    console.log("   Creating dining hall " + meal.diningHall + " for date " + meal.date);
+                    console.log(
+                        "   Creating dining hall " +
+                            meal.diningHall +
+                            " for date " +
+                            meal.date
+                    );
 
-                    console.log("       Creating meal period " + meal.mealPeriod);
+                    console.log(
+                        "       Creating meal period " + meal.mealPeriod
+                    );
                     // Get the meal period temporary template, copied
                     const mp = structuredClone(
                         mealPeriodStartEndTime[meal.mealPeriod]
                     );
 
-                    console.log("           Creating subcategory " + meal.subcategory);
+                    console.log(
+                        "           Creating subcategory " + meal.subcategory
+                    );
                     console.log("               Adding meal " + meal.mealID);
                     // Add the meal's subcategory, and only meal as this one
                     mp.subcategories.push({
@@ -147,60 +170,95 @@ export const runScraper = async () => {
                         name: meal.diningHall,
                         date: meal.date,
                         mealPeriods: [mp],
-                        finished: false
-                    }
+                        finished: false,
+                    };
 
                     // Add reference to this dining hall to mark as completed on finish
                     diningHalls.push(dh);
 
-                // Found a dining hall in the database
+                    // Found a dining hall in the database
                 } else {
-                    console.log("   Found dining hall " + meal.diningHall + " for date " + meal.date);
+                    console.log(
+                        "   Found dining hall " +
+                            meal.diningHall +
+                            " for date " +
+                            meal.date
+                    );
                     // Already completed for today, don't need to add duplicates
                     if (diningHall.finished) {
-                        console.log("   Already completed dining hall " + meal.diningHall + " for date " + meal.date);
+                        console.log(
+                            "   Already completed dining hall " +
+                                meal.diningHall +
+                                " for date " +
+                                meal.date
+                        );
                         continue;
                     }
 
                     // Attempt to find the meal period for this meal
                     let mp = diningHall.mealPeriods.findIndex(
-                        (m: MealPeriod) => m.name === convertScrapingMealPeriod[meal.mealPeriod]
+                        (m: MealPeriod) =>
+                            m.name ===
+                            convertScrapingMealPeriod[meal.mealPeriod]
                     );
 
                     // If the meal period was found
                     if (mp != -1) {
-                        console.log("       Found meal period " + meal.mealPeriod);
+                        console.log(
+                            "       Found meal period " + meal.mealPeriod
+                        );
                         // Find the subcategory for this meal
-                        let subcat = diningHall.mealPeriods[mp].subcategories.findIndex(
+                        let subcat = diningHall.mealPeriods[
+                            mp
+                        ].subcategories.findIndex(
                             (s: Subcategory) => s.name === meal.subcategory
                         );
 
                         // If the subcategory was found, add this meal ID to it
                         if (subcat != -1) {
-                            console.log("           Found subcategory " + meal.subcategory);
-                            console.log("               Adding meal " + meal.mealID);
-                            diningHall.mealPeriods[mp].subcategories[subcat].meals.push(meal.mealID);
+                            console.log(
+                                "           Found subcategory " +
+                                    meal.subcategory
+                            );
+                            console.log(
+                                "               Adding meal " + meal.mealID
+                            );
+                            diningHall.mealPeriods[mp].subcategories[
+                                subcat
+                            ].meals.push(meal.mealID);
 
-                        // Was not found, create a new subcategory with this meal
+                            // Was not found, create a new subcategory with this meal
                         } else {
-                            console.log("           Creating subcategory " + meal.subcategory);
-                            console.log("               Adding meal " + meal.mealID);
+                            console.log(
+                                "           Creating subcategory " +
+                                    meal.subcategory
+                            );
+                            console.log(
+                                "               Adding meal " + meal.mealID
+                            );
                             diningHall.mealPeriods[mp].subcategories.push({
                                 name: meal.subcategory,
                                 meals: [meal.mealID],
                             });
                         }
 
-                    // Meal period was not found
+                        // Meal period was not found
                     } else {
                         // Generate meal period from template, copied
-                        console.log("       Creating meal period " + meal.mealPeriod);
+                        console.log(
+                            "       Creating meal period " + meal.mealPeriod
+                        );
                         const mpl = structuredClone(
                             mealPeriodStartEndTime[meal.mealPeriod]
                         );
 
-                        console.log("           Creating subcategory " + meal.subcategory);
-                        console.log("               Adding meal " + meal.mealID);
+                        console.log(
+                            "           Creating subcategory " +
+                                meal.subcategory
+                        );
+                        console.log(
+                            "               Adding meal " + meal.mealID
+                        );
                         // Add subcategory
                         mpl.subcategories.push({
                             name: meal.subcategory,
@@ -211,7 +269,12 @@ export const runScraper = async () => {
                         diningHall.mealPeriods.push(mpl);
                     }
 
-                    console.log("   Saving dining hall " + meal.diningHall + " for date " + meal.date);
+                    console.log(
+                        "   Saving dining hall " +
+                            meal.diningHall +
+                            " for date " +
+                            meal.date
+                    );
                 }
             } catch (err) {
                 console.error(err);
@@ -222,12 +285,23 @@ export const runScraper = async () => {
         for (const dh of diningHalls) {
             dh.finished = true;
             await DiningHall.create(dh);
-            console.log("Marked dining hall " + dh.name + " for date " + dh.date + " as finished");
+            console.log(
+                "Marked dining hall " +
+                    dh.name +
+                    " for date " +
+                    dh.date +
+                    " as finished"
+            );
         }
 
-    // Some sort of error pertaining to Python script, 
-    // JSON parsing, or database retrieval, saving
+        // Some sort of error pertaining to Python script,
+        // JSON parsing, or database retrieval, saving
     } catch (err) {
         console.error(err);
     }
 };
+
+mongoose.set("strictQuery", true);
+mongoose.connect(config.MONGOURI).then(() => {
+    runScraper();
+});

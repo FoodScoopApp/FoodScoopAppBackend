@@ -21,4 +21,4 @@ RUN pip3 install -Ur scraping/requirements.txt
 # Expose the listening port of your app
 EXPOSE 8080
 
-CMD [ "pm2-runtime", "start", "ecosystem.config.js" ]
+CMD ./detectenv.sh
