@@ -227,7 +227,7 @@ routeBuilder("get", "mealagg", async (req) => {
     if (!is<MealAggReq>(req)) return badRequestError;
     const mealIDs = req.mealIDs.split(",");
     let meals = await Meal.find({ id: { $in: mealIDs } });
-    if (meals.length < mealIDs.length) {
+    if (meals.length < 1) {
         return { resp: { error: "NotFound" }, code: 404 };
     }
 
