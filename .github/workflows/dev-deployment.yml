@@ -126,7 +126,7 @@ jobs:
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.SERVICE }}:${{ steps.commit.outputs.short }}
           
       - name: Deploy to Cloud Run (Scraper)
-        id: deploy
+        id: deployscraper
         uses: google-github-actions/deploy-cloudrun@v0
         with:
           service: ${{ env.SERVICE2 }}
