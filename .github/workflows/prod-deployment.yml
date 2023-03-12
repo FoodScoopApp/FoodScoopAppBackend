@@ -46,12 +46,13 @@ name: Build and Deploy to Cloud Run
 
 on:
   push:
-    branches: [ "main" ]
+    tags:
+      - "*"
 
 env:
   PROJECT_ID: ornate-casing-376301
   GAR_LOCATION: us-central1
-  SERVICE: foodscoop-dev
+  SERVICE: foodscoop-prod
   REGION: us-central1
 
 jobs:
@@ -81,7 +82,7 @@ jobs:
           # The path to the file to write.
           path: './config.ts'
           # The contents of the file
-          contents: '${{ secrets.CONFIG_DEV }}'
+          contents: '${{ secrets.CONFIG_PROD }}'
       - name: Google Auth
         id: auth
         uses: 'google-github-actions/auth@v0'
