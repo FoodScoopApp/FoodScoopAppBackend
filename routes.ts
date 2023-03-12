@@ -21,6 +21,9 @@ import {
     UserReq,
     ChangeUserPropReq,
 } from "./FoodScoopAppTypes/re";
+import { dateFormat } from "./FoodScoopAppTypes/converters";
+import moment from "moment";
+import { DiningHallName } from "./FoodScoopAppTypes/models";
 
 const BASEROUTE = "/api/v1/";
 const route = (endpoint: Endpoint) => BASEROUTE + endpoint;
@@ -270,4 +273,40 @@ routeBuilder(
         return { resp: { success: true }, code: 200 };
     },
     true
+);
+
+routeBuilder(
+	"get",
+	"activity",
+	async (req, _) => {
+		// If dh is specified, return single level,
+		// otherwise just return the whole dict.
+		if (is<ActivityLevelReq>(req)) {
+			const dh = await DiningHall.findOne({ name: req.diningHall, date: moment().format(dateFormat) })
+			if (dh?.activityLevel) {
+				return { resp: { level: dh.activityLevel }, code: 200 }
+			} else {
+				return { resp: { level: null }, code: 200 }
+			}
+		} else {
+			const dhs = await DiningHall.find({ date: moment().format(dateFormat) })
+			const result: { [Property in DiningHallName]: number | null } = {
+				BP: null,
+				DN: null,
+				RE: null,
+				RW: null,
+				BC: null,
+				EC: null,
+				EA: null,
+				SH: null,
+				DR: null,
+			}
+			for (const dh of dhs) {
+				if (dh.activityLevel) {
+					result[dh.name] = dh.activityLevel
+				}
+			}
+			return { resp: result, code: 200 }
+		}
+	}
 );
