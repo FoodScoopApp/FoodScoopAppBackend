@@ -310,3 +310,18 @@ routeBuilder(
 		}
 	}
 );
+
+routeBuilder(
+	"post",
+	"pushToken",
+	async (req, currentUser) => {
+		if (!is<PushTokenUpdateReq>(req)) return badRequestError
+		if (!currentUser) return { resp: { error: "InternalServer" }, code: 500 }
+		const userSchema = await User.findOne({ email: currentUser })
+		if (!userSchema) return { resp: { error: "InternalServer" }, code: 500 }
+		let tokens = userSchema.notificationTokens
+		tokens = tokens ? tokens : []
+		tokens.push({ token: req.token, device: req.device })
+		await userSchema.save()
+		return { code: 200, resp: { success: true } }
+	});
