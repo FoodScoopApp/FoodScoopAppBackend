@@ -20,6 +20,7 @@ import {
 	MealAggReq,
 	ChangeUserPropReq,
 	ActivityLevelReq,
+	PushTokenUpdateReq,
 } from "./FoodScoopAppTypes/re";
 import { dateFormat } from "./FoodScoopAppTypes/converters";
 import moment from "moment";
