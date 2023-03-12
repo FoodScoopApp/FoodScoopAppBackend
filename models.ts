@@ -19,6 +19,7 @@ const userSchema = new Schema<models.User>({
     dietaryRestrictions: [String],
     mealPlan: String,
     caloricIntakePerDay: Number,
+    notificationsSent: Object,
 });
 export const User = model("User", userSchema);
 
