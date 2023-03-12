@@ -44,7 +44,8 @@ const diningHallSchema = new Schema<models.DiningHall>({
     name: { type: String, required: true },
     date: { type: String, required: true },
     mealPeriods: { type: [Object], required: true },
-    finished: { type: Boolean, required: true }
+    finished: { type: Boolean, required: true },
+    activityLevel: Number
 });
 export const DiningHall = model("DiningHall", diningHallSchema);
 
@@ -55,11 +56,3 @@ const comprehensiveMealPlanSchema = new Schema<models.ComprehensiveMealPlan>({
     meals: { type: Object, required: true }
 });
 export const ComprehensiveMealPlan = model("ComprehensiveMealPlan", comprehensiveMealPlanSchema);
-
-
-
-
-
-
-
-

@@ -1,8 +1,5 @@
 import { exec } from "child_process";
-import express from "express";
 import moment from "moment";
-import mongoose from "mongoose";
-import config from "./config";
 import { convertScrapingMealPeriod } from "./FoodScoopAppTypes/converters";
 import { MealPeriod, Subcategory } from "./FoodScoopAppTypes/models";
 
@@ -53,7 +50,7 @@ const runPython = () => {
 };
 
 // Run scraper from Python script
-const runScraper = async () => {
+export const runScraper = async () => {
     console.log("Running scraper...");
     try {
         // Attempt to read from Python script's stdout
@@ -301,19 +298,3 @@ const runScraper = async () => {
         console.error(err);
     }
 };
-
-mongoose.set("strictQuery", true);
-mongoose.connect(config.MONGOURI).then(() => {
-    runScraper();
-});
-
-// Create express endpoint to denote start
-const app = express();
-app.get("/", (_, res) => {
-    runScraper().then(() => {
-        res.status(200).send("ran");
-    });
-});
-app.listen(config.PORT, () => {
-    console.log(`FoodScoop scraper listening on port ${config.PORT}`);
-});

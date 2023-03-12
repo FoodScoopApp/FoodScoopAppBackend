@@ -1,9 +1,12 @@
 import axios from "axios";
 import { DiningHallName } from "./FoodScoopAppTypes/models";
 import * as cheerio from 'cheerio';
+import { DiningHall } from "./models";
+import moment from "moment";
+import { dateFormat } from "./FoodScoopAppTypes/converters";
 
-export async function getActivityLevels(): Promise<{ [Property in DiningHallName]: number | null }> {
-	const levels = {
+export async function getActivityLevels() {
+	const levels: { [Property in DiningHallName]: number | null } = {
 		BP: await scrapeBP(),
 		DN: await scrapeDN(),
 		RE: await scrapeR(),
@@ -14,8 +17,17 @@ export async function getActivityLevels(): Promise<{ [Property in DiningHallName
 		SH: await scrapeSH(),
 		DR: await scrapeDR(),
 	}
-	console.log(levels)
-	return levels
+	for (const [key, value] of Object.entries(levels)) {
+		console.log(`${key}: ${value}`);
+		let dh = await DiningHall.findOne({
+			name: key,
+			date: moment().format(dateFormat),
+		});
+		if (dh) {
+			dh.set({ activityLevel: value })
+			dh.save()
+		}
+	}
 }
 
 async function scrape(urlSuffix: string): Promise<number | null> {

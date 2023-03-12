@@ -25,4 +25,4 @@ EXPOSE 8080
 RUN apk add --no-cache tzdata
 ENV TZ=America/Los_Angeles
 
-CMD ./detectenv.sh
+CMD [ "pm2-runtime", "start", "ecosystem.config.js" ]
