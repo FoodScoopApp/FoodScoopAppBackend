@@ -2,7 +2,7 @@ import moment from "moment";
 import config from "./config";
 import { convertDiningHall, dateFormat, getCurrentMealPeriodForDiningHall, timeFormat } from "./FoodScoopAppTypes/converters";
 import { DiningHall as TypeDiningHall, DiningHallName, User as TypeUser } from "./FoodScoopAppTypes/models";
-import { DiningHall as SchemeDiningHall, User as SchemeUser } from "./models";
+import { DiningHall as SchemeDiningHall, Meal, User as SchemeUser } from "./models";
 import { Expo } from 'expo-server-sdk';
 
 
@@ -12,8 +12,8 @@ const thresholds: { [Property in DiningHallName]: number } = {
 	RE: 50,
 	RW: 50,
 	BC: 50,
-	EC: 50,
-	EA: 50,
+	EC: 60,
+	EA: 60,
 	SH: 50,
 	DR: 50,
 }
@@ -60,9 +60,9 @@ export async function sendNotifications() {
 
 type NotificationObject = { body: string, title: string }
 
-async function generateNotification(user: TypeUser, dhs: { [Property in DiningHallName]: TypeDiningHall | null }): Promise<NotificationObject[]> {
+async function generateNotification(user: TypeUser,
+	dhs: { [Property in DiningHallName]: TypeDiningHall | null }): Promise<NotificationObject[]> {
 	let results: NotificationObject[] = []
-	// TODO: notification for opening
 	if (!user.favDiningHalls) return results
 	for (const dhName of user.favDiningHalls) {
 		const dh = dhs[dhName]
@@ -82,8 +82,32 @@ async function generateNotification(user: TypeUser, dhs: { [Property in DiningHa
 		const dhFullname = convertDiningHall[dh.name]
 		if (mealPeriod) {
 			const startTime = moment(mealPeriod.startTime, timeFormat)
-			if (Math.abs(moment().diff(startTime, 's')) < 60)
+			// INFO: consider finding a better way to determine if already sent
+			// one possible way to avoid missing / duplicated notifications
+			// is to call this larger intervals
+			if (Math.abs(moment().diff(startTime, 's')) < 60) {
+				// Opening notification
 				results.push({ title: `${dhFullname} is now open!`, body: `` })
+
+				// Notification for favorite meal
+				const favMeals = user.favMeals
+				if (favMeals) {
+					const meals = mealPeriod.subcategories.flatMap((subcategory) => {
+						return subcategory.meals
+					})
+					// INFO: consider merging into one notification
+					// factors to consider: too many meals
+					// that cannot be shown in the title / body
+					for (const meal of meals) {
+						if (favMeals.includes(meal)) {
+							results.push({
+								title: `${dhFullname} is now serving ${meal} !`,
+								body: ``
+							})
+						}
+					}
+				}
+			}
 		}
 		if (!dh.activityLevel) continue
 		if (dh.activityLevel <= thresholds[dh.name]) {
