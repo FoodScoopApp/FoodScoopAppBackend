@@ -132,21 +132,22 @@ async function generateOpeningNotifications(mealPeriod: MealPeriod, user: TypeUs
 async function generateNotification(user: TypeUser,
 	dhs: { [Property in DiningHallName]: TypeDiningHall | null }): Promise<NotificationObject[]> {
 	if (!user.favDiningHalls) return []
-	const unflattened = await Promise.all(
-		user.favDiningHalls.map(async (dhName) => {
-			const dh = dhs[dhName]
-			const empty: NotificationObject[] = []
-			if (!dh) return empty
-			const mealPeriod = getCurrentMealPeriodForDiningHall(dh)
-			const dhFullname = convertDiningHall[dh.name]
-			if (mealPeriod) {
-				const opening = await generateOpeningNotifications(
-					mealPeriod, user, dhFullname)
-				const activity = await generateActivityNotification(dh, user)
-				return opening.concat(activity)
-			}
-			return empty
-		}))
+	const diningHallToNotificationsMap = async (dhName: DiningHallName) => {
+		const dh = dhs[dhName]
+		const empty: NotificationObject[] = []
+		if (!dh) return empty
+		const mealPeriod = getCurrentMealPeriodForDiningHall(dh)
+		const dhFullname = convertDiningHall[dh.name]
+		if (mealPeriod) {
+			const opening = await generateOpeningNotifications(
+				mealPeriod, user, dhFullname)
+			const activity = await generateActivityNotification(dh, user)
+			return opening.concat(activity)
+		}
+		return empty
+	}
+	const unflattened = await Promise.all(user.favDiningHalls
+		.map(diningHallToNotificationsMap))
 	return unflattened.flat()
 }
 
