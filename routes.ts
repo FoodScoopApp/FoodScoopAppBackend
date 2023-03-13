@@ -325,4 +325,4 @@ routeBuilder(
 		tokens.push({ token: req.token, device: req.device })
 		await userSchema.save()
 		return { code: 200, resp: { success: true } }
-	});
+	}, true);
