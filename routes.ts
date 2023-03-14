@@ -322,7 +322,9 @@ routeBuilder(
 		if (!userSchema) return { resp: { error: "InternalServer" }, code: 500 }
 		let tokens = userSchema.notificationTokens
 		tokens = tokens ? tokens : []
-		tokens.push({ token: req.token, device: req.device })
+		if (!tokens.includes(req)) {
+			tokens.push(req)
+		}
 		await userSchema.save()
 		return { code: 200, resp: { success: true } }
 	}, true);
