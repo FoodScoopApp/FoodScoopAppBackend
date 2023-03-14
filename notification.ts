@@ -94,7 +94,11 @@ async function generateActivityNotification(
 	if (!dh.activityLevel) return []
 	if (!favDiningHalls) return []
 	if (checkAlreadySent(dh, user)) return []
+	const mp = getCurrentMealPeriodForDiningHall(dh)
+	if (!mp) return []
+	const afterThirtyMin = moment(mp.startTime, mpFormat).add(30, "m")
 	if (dh.activityLevel <= thresholds[dh.name]
+		&& moment().diff(afterThirtyMin) > 0
 		&& favDiningHalls.includes(dh.name)) {
 		const dhFullname = convertDiningHall[dh.name]
 		results.push({ title: `${dhFullname} activity is only ${dh.activityLevel}% now!`, body: `` })
