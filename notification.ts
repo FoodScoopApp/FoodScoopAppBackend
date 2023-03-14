@@ -2,7 +2,7 @@ import moment from "moment";
 import config from "./config";
 import { convertDiningHall, dateFormat, getCurrentMealPeriodForDiningHall, mpFormat, timeFormat } from "./FoodScoopAppTypes/converters";
 import { DiningHall as TypeDiningHall, DiningHallName, MealPeriod, User as TypeUser } from "./FoodScoopAppTypes/models";
-import { DiningHall as SchemaDiningHall, User as SchemaUser } from "./models";
+import { DiningHall as SchemaDiningHall, Meal, User as SchemaUser } from "./models";
 import { Expo } from 'expo-server-sdk';
 
 
@@ -67,16 +67,18 @@ async function generateMealNotifications(
 	favMeals: string[],
 	dhFullname: string): Promise<NotificationObject[]> {
 	let results: NotificationObject[] = []
-	const meals = mealPeriod.subcategories.flatMap((subcategory) => {
+	const mealIDs = mealPeriod.subcategories.flatMap((subcategory) => {
 		return subcategory.meals
 	})
 	// INFO: consider merging into one notification
 	// factors to consider: too many meals
 	// that cannot be shown in the title / body
-	for (const meal of meals) {
-		if (favMeals.includes(meal)) {
+	for (const mealID of mealIDs) {
+		if (favMeals.includes(mealID)) {
+			const meal = await Meal.findOne({id: mealID})
+			if (!meal) continue
 			results.push({
-				title: `${dhFullname} is now serving ${meal} !`,
+				title: `${dhFullname} is now serving ${meal.name} !`,
 				body: ``
 			})
 		}
