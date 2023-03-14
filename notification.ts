@@ -119,27 +119,28 @@ async function generateOpeningNotifications(
 	mealPeriod: MealPeriod,
 	user: TypeUser,
 	dh: TypeDiningHall): Promise<NotificationObject[]> {
-	let results: NotificationObject[] = []
 	const startTime = moment(mealPeriod.startTime, mpFormat)
 	const dhFullname = convertDiningHall[dh.name]
 	// INFO: consider finding a better way to determine if already sent
 	// one possible way to avoid missing / duplicated notifications
 	// is to call this larger intervals
-	if (Math.abs(moment().diff(startTime, 's')) < 60) {
+	const diff = moment().diff(startTime, 's')
+	if (diff > 0 && diff < 60) {
+		// Notification for favorite meal
+		const favMeals = user.favMeals
+		if (favMeals) {
+			const notifications = await generateMealNotifications(mealPeriod, favMeals, dhFullname)
+			if (notifications.length !== 0) return notifications
+		}
+
 		// Favorite dininghall opening notification
 		const favDiningHalls = user.favDiningHalls
 		if (favDiningHalls) {
 			if (favDiningHalls.includes(dh.name))
-				results.push({ title: `${dhFullname} is now open!`, body: `` })
-		}
-
-		// Notification for favorite meal
-		const favMeals = user.favMeals
-		if (favMeals) {
-			results = results.concat(await generateMealNotifications(mealPeriod, favMeals, dhFullname))
+				return [{ title: `${dhFullname} is now open!`, body: `` }]
 		}
 	}
-	return results
+	return []
 }
 
 async function generateNotification(user: TypeUser,
