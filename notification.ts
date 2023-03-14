@@ -7,15 +7,15 @@ import { Expo } from 'expo-server-sdk';
 
 
 const thresholds: { [Property in DiningHallName]: number } = {
-	BP: 50,
-	DN: 50,
-	RE: 50,
-	RW: 50,
-	BC: 50,
-	EC: 60,
-	EA: 60,
-	SH: 50,
-	DR: 50,
+	BP: 40,
+	DN: 40,
+	RE: 40,
+	RW: 40,
+	BC: 40,
+	EC: 40,
+	EA: 40,
+	SH: 40,
+	DR: 40,
 }
 
 export async function sendNotifications() {
@@ -170,15 +170,15 @@ type ExpoNotification = { to: string, sound: 'default', body: string, data: Obje
 async function send(content: NotificationObject[], user: TypeUser) {
 	const expo = new Expo({ accessToken: config.EXPO_ACCESS_TOKEN })
 	let objects: ExpoNotification[] = []
-	for (const token of user.tokens!) {
-		if (!Expo.isExpoPushToken(token)) continue
-		objects = objects.concat(content.map((item) => {
+	for (const tokenContainer of user.notificationTokens!) {
+		if (!Expo.isExpoPushToken(tokenContainer.token)) continue
+		objects.push(...content.map((item) => {
 			return {
-				to: token,
+				to: tokenContainer.token,
 				sound: 'default',
 				body: item.title,
 				data: {},
-			}
+			} as ExpoNotification
 		}))
 	}
 	const chunks = expo.chunkPushNotifications(objects)
