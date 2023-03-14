@@ -1,6 +1,6 @@
 import moment from "moment";
 import config from "./config";
-import { convertDiningHall, dateFormat, getCurrentMealPeriodForDiningHall, timeFormat } from "./FoodScoopAppTypes/converters";
+import { convertDiningHall, dateFormat, getCurrentMealPeriodForDiningHall, mpFormat, timeFormat } from "./FoodScoopAppTypes/converters";
 import { DiningHall as TypeDiningHall, DiningHallName, MealPeriod, User as TypeUser } from "./FoodScoopAppTypes/models";
 import { DiningHall as SchemaDiningHall, User as SchemaUser } from "./models";
 import { Expo } from 'expo-server-sdk';
@@ -103,7 +103,7 @@ async function generateOpeningNotifications(
 	user: TypeUser,
 	dh: TypeDiningHall): Promise<NotificationObject[]> {
 	let results: NotificationObject[] = []
-	const startTime = moment(mealPeriod.startTime, timeFormat)
+	const startTime = moment(mealPeriod.startTime, mpFormat)
 	const dhFullname = convertDiningHall[dh.name]
 	// INFO: consider finding a better way to determine if already sent
 	// one possible way to avoid missing / duplicated notifications
