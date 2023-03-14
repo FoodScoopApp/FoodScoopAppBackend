@@ -78,7 +78,7 @@ async function generateMealNotifications(
 			const meal = await Meal.findOne({id: mealID})
 			if (!meal) continue
 			results.push({
-				title: `${dhFullname} is now serving ${meal.name} !`,
+				title: `${dhFullname} is now serving ${meal.name}!`,
 				body: ``
 			})
 		}
