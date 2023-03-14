@@ -54,7 +54,7 @@ function checkAlreadySent(dh: TypeDiningHall, user: TypeUser): boolean {
 	const time = moment(lastSentForDh, timeFormat)
 	const mealPeriod = getCurrentMealPeriodForDiningHall(dh)
 	if (mealPeriod) {
-		const startTime = moment(mealPeriod.startTime, timeFormat)
+		const startTime = moment(mealPeriod.startTime, mpFormat)
 		if (time.diff(startTime) > 0) {
 			return true
 		}
