@@ -62,28 +62,36 @@ function checkAlreadySent(dh: TypeDiningHall, user: TypeUser): boolean {
 	return false
 }
 
+function concatMealNames(names: string[]): string | null {
+	switch (names.length) {
+		case 0: return null
+		case 1: return names[0]
+		case 2: return `${names[0]} and ${names[1]}`
+		default: return `${names[0]}, ${names[1]}, and more`
+	}
+}
+
 async function generateMealNotifications(
 	mealPeriod: MealPeriod,
 	favMeals: string[],
 	dhFullname: string): Promise<NotificationObject[]> {
-	let results: NotificationObject[] = []
 	const mealIDs = mealPeriod.subcategories.flatMap((subcategory) => {
 		return subcategory.meals
 	})
-	// INFO: consider merging into one notification
-	// factors to consider: too many meals
-	// that cannot be shown in the title / body
+	const mealNames: string[] = []
 	for (const mealID of mealIDs) {
 		if (favMeals.includes(mealID)) {
-			const meal = await Meal.findOne({id: mealID})
+			const meal = await Meal.findOne({ id: mealID })
 			if (!meal) continue
-			results.push({
-				title: `${dhFullname} is now serving ${meal.name}!`,
-				body: ``
-			})
+			mealNames.push(meal.name)
 		}
 	}
-	return results
+	const concatedNames = concatMealNames(mealNames)
+	if (!concatedNames) return []
+	return [{
+		title: `${dhFullname} is now open, serving ${concatedNames}!`,
+		body: ``
+	}]
 }
 
 async function generateActivityNotification(
