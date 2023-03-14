@@ -88,11 +88,14 @@ async function generateActivityNotification(
 	dh: TypeDiningHall,
 	user: TypeUser): Promise<NotificationObject[]> {
 	let results: NotificationObject[] = []
+	const favDiningHalls = user.favDiningHalls
 	if (!dh.activityLevel) return []
+	if (!favDiningHalls) return []
 	if (checkAlreadySent(dh, user)) return []
-	if (dh.activityLevel <= thresholds[dh.name]) {
+	if (dh.activityLevel <= thresholds[dh.name]
+		&& favDiningHalls.includes(dh.name)) {
 		const dhFullname = convertDiningHall[dh.name]
-		results.push({ title: `${dhFullname} activity is low now!`, body: `` })
+		results.push({ title: `${dhFullname} activity is only ${dh.activityLevel}% now!`, body: `` })
 		await updateUserRecord(user, dh.name)
 	}
 	return results
@@ -129,8 +132,7 @@ async function generateNotification(user: TypeUser,
 	dhs: { [Property in DiningHallName]: TypeDiningHall | null }): Promise<NotificationObject[]> {
 	const diningHallToNotificationsMap = async (dhName: DiningHallName) => {
 		const dh = dhs[dhName]
-		const empty: NotificationObject[] = []
-		if (!dh) return empty
+		if (!dh) return []
 		const mealPeriod = getCurrentMealPeriodForDiningHall(dh)
 		if (mealPeriod) {
 			const opening = await generateOpeningNotifications(
@@ -138,7 +140,7 @@ async function generateNotification(user: TypeUser,
 			const activity = await generateActivityNotification(dh, user)
 			return opening.concat(activity)
 		}
-		return empty
+		return []
 	}
 	const dhNames = Object.keys(convertDiningHall) as DiningHallName[]
 	const unflattened = await Promise.all(dhNames.map(diningHallToNotificationsMap))
@@ -160,7 +162,8 @@ async function updateUserRecord(user: TypeUser, dhName: DiningHallName) {
 		SH: null,
 		DR: null,
 	}
-	record[dhName] = moment().to(timeFormat)
+	const time = moment().format(timeFormat)
+	record[dhName] = time
 	schemaUser.notificationsSent = record
 	await schemaUser.save()
 }
