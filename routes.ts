@@ -5,22 +5,22 @@ import { equals, is } from "typia";
 import { genSaltSync, hashSync, compareSync } from "bcrypt";
 import { v4 } from "uuid";
 import {
-	Endpoint,
-	Method,
-	Resp,
-	Authorization,
-	ErrorResp,
-	CheckUserExistsReq,
-	CheckUserExistsResp,
-	SignInReq,
-	SignUpInResp,
-	SignUpReq,
-	DiningHallReq,
-	MealReq,
-	MealAggReq,
-	ChangeUserPropReq,
-	ActivityLevelReq,
-	PushTokenUpdateReq,
+    Endpoint,
+    Method,
+    Resp,
+    Authorization,
+    ErrorResp,
+    CheckUserExistsReq,
+    CheckUserExistsResp,
+    SignInReq,
+    SignUpInResp,
+    SignUpReq,
+    DiningHallReq,
+    MealReq,
+    MealAggReq,
+    ChangeUserPropReq,
+    ActivityLevelReq,
+    PushTokenUpdateReq,
 } from "./FoodScoopAppTypes/re";
 import { dateFormat } from "./FoodScoopAppTypes/converters";
 import moment from "moment";
@@ -276,55 +276,132 @@ routeBuilder(
     true
 );
 
+routeBuilder("get", "activity", async (req, _) => {
+    // If dh is specified, return single level,
+    // otherwise just return the whole dict.
+    if (is<ActivityLevelReq>(req)) {
+        const dh = await DiningHall.findOne({
+            name: req.diningHall,
+            date: moment().format(dateFormat),
+        });
+        if (dh?.activityLevel) {
+            return { resp: { level: dh.activityLevel }, code: 200 };
+        } else {
+            return { resp: { level: null }, code: 200 };
+        }
+    } else {
+        const dhs = await DiningHall.find({
+            date: moment().format(dateFormat),
+        });
+        const result: { [Property in DiningHallName]: number | null } = {
+            BP: null,
+            DN: null,
+            RE: null,
+            RW: null,
+            BC: null,
+            EC: null,
+            EA: null,
+            SH: null,
+            DR: null,
+        };
+        for (const dh of dhs) {
+            if (dh.activityLevel) {
+                result[dh.name] = dh.activityLevel;
+            }
+        }
+        return { resp: result, code: 200 };
+    }
+});
+
 routeBuilder(
-	"get",
-	"activity",
-	async (req, _) => {
-		// If dh is specified, return single level,
-		// otherwise just return the whole dict.
-		if (is<ActivityLevelReq>(req)) {
-			const dh = await DiningHall.findOne({ name: req.diningHall, date: moment().format(dateFormat) })
-			if (dh?.activityLevel) {
-				return { resp: { level: dh.activityLevel }, code: 200 }
-			} else {
-				return { resp: { level: null }, code: 200 }
-			}
-		} else {
-			const dhs = await DiningHall.find({ date: moment().format(dateFormat) })
-			const result: { [Property in DiningHallName]: number | null } = {
-				BP: null,
-				DN: null,
-				RE: null,
-				RW: null,
-				BC: null,
-				EC: null,
-				EA: null,
-				SH: null,
-				DR: null,
-			}
-			for (const dh of dhs) {
-				if (dh.activityLevel) {
-					result[dh.name] = dh.activityLevel
-				}
-			}
-			return { resp: result, code: 200 }
-		}
-	}
+    "post",
+    "pushToken",
+    async (req, currentUser) => {
+        if (!is<PushTokenUpdateReq>(req)) return badRequestError;
+        if (!currentUser)
+            return { resp: { error: "InternalServer" }, code: 500 };
+        const userSchema = await User.findOne({ email: currentUser });
+        if (!userSchema)
+            return { resp: { error: "InternalServer" }, code: 500 };
+        let tokens = userSchema.notificationTokens;
+        tokens = tokens ? tokens : [];
+        if (!tokens.includes(req)) {
+            tokens.push(req);
+        }
+        await userSchema.save();
+        return { code: 200, resp: { success: true } };
+    },
+    true
 );
 
 routeBuilder(
-	"post",
-	"pushToken",
-	async (req, currentUser) => {
-		if (!is<PushTokenUpdateReq>(req)) return badRequestError
-		if (!currentUser) return { resp: { error: "InternalServer" }, code: 500 }
-		const userSchema = await User.findOne({ email: currentUser })
-		if (!userSchema) return { resp: { error: "InternalServer" }, code: 500 }
-		let tokens = userSchema.notificationTokens
-		tokens = tokens ? tokens : []
-		if (!tokens.includes(req)) {
-			tokens.push(req)
-		}
-		await userSchema.save()
-		return { code: 200, resp: { success: true } }
-	}, true);
+    "get",
+    "mealplan",
+    async (req, currentUser) => {
+        let user = await User.findOne({ email: currentUser });
+        if (!user) return { resp: { error: "NotFound" }, code: 404 };
+
+        let favDiningHallMeals: any = {};
+        let mealPeriodsToDH: any = {};
+        for (let dhname of user.favDiningHalls ?? ["BP", "EC", "DN"]) {
+            let dh = await DiningHall.findOne({
+                name: dhname,
+                date: moment().format(dateFormat),
+            });
+            let diningHallMeals: any = {};
+            if (!dh) continue;
+            for (let mealPeriod of dh.mealPeriods) {
+                if (mealPeriodsToDH[mealPeriod.name]) {
+                    mealPeriodsToDH[mealPeriod.name].push(dhname);
+                } else {
+                    mealPeriodsToDH[mealPeriod.name] = [];
+                }
+                let mealPeriodMeals: any[] = [];
+                for (let subcategory of mealPeriod.subcategories) {
+                    let subcategoryMeals = await Meal.find({
+                        id: { $in: subcategory.meals },
+                    });
+                    if (!subcategoryMeals) continue;
+                    mealPeriodMeals = [...mealPeriodMeals, ...subcategoryMeals];
+                }
+                mealPeriodMeals = mealPeriodMeals.filter(
+                    (x) => x.nutritionalInfo.calories > 100
+                );
+                mealPeriodMeals = mealPeriodMeals.filter((x) => {
+                    for (let r of (user ?? {}).dietaryRestrictions ?? []) {
+                        if (!x.dietaryRestrictions.includes(r)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+                diningHallMeals[mealPeriod.name] = mealPeriodMeals;
+            }
+            // TODO: Pick from dining hall meals
+            favDiningHallMeals[dhname] = diningHallMeals;
+        }
+        console.log(favDiningHallMeals);
+
+        let final: any = {};
+
+        for (let mealPeriod in mealPeriodsToDH) {
+            let random = Math.floor(
+                Math.random() * mealPeriodsToDH[mealPeriod].length
+            );
+            let randomDH = mealPeriodsToDH[mealPeriod][random];
+            random = Math.floor(
+                Math.random() * favDiningHallMeals[randomDH][mealPeriod].length
+            );
+            final[mealPeriod] =
+                favDiningHallMeals[randomDH][mealPeriod][random];
+        }
+
+        let result: any = {
+            user: currentUser,
+            startDate: moment().format(dateFormat),
+            meals: final,
+        };
+        return { resp: result, code: 200 };
+    },
+    true
+);
