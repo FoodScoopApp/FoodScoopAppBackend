@@ -1,5 +1,5 @@
 import { app } from "./main";
-import { DiningHall, Meal, User } from "./models";
+import { DiningHall, Meal, User, ComprehensiveMealPlan } from "./models";
 
 import { equals, is } from "typia";
 import { genSaltSync, hashSync, compareSync } from "bcrypt";
@@ -309,4 +309,67 @@ routeBuilder(
 			return { resp: result, code: 200 }
 		}
 	}
+);
+
+routeBuilder(
+	"get",
+	"mealplan",
+	async (req, currentUser) => {
+		let user = await User.findOne({ email: currentUser })
+		if (!user) return { resp: { error: "NotFound" }, code: 404 };
+
+		let favDiningHallMeals : any = {}
+		let mealPeriodsToDH : any = {}
+		for (let dhname of user.favDiningHalls ?? ['BP','EC','DN']) {
+			let dh = await DiningHall.findOne({ name: dhname, date: moment().format(dateFormat) })
+			let diningHallMeals : any = {}
+			if (!dh) continue;
+			for (let mealPeriod of dh.mealPeriods) {
+				if (mealPeriodsToDH[mealPeriod.name]) {
+					mealPeriodsToDH[mealPeriod.name].push(dhname)
+				}
+				else {
+					mealPeriodsToDH[mealPeriod.name] = []
+				}
+				let mealPeriodMeals : any[] = []
+				for (let subcategory of mealPeriod.subcategories) {
+					let subcategoryMeals = await Meal.find({
+						id: { $in: subcategory.meals }
+					})
+					if (!subcategoryMeals) continue;
+					mealPeriodMeals = [...mealPeriodMeals, ...subcategoryMeals]
+				}
+				mealPeriodMeals = mealPeriodMeals.filter(x => x.nutritionalInfo.calories > 100)
+				mealPeriodMeals = mealPeriodMeals.filter(x => {
+					for (let r of (user ?? {}).dietaryRestrictions ?? []) {
+						if (!(x.dietaryRestrictions.includes(r))) {
+							return false;
+						}
+					}
+					return true;
+				})
+				diningHallMeals[mealPeriod.name] = mealPeriodMeals
+			}
+			// TODO: Pick from dining hall meals
+			favDiningHallMeals[dhname] = diningHallMeals
+		}
+		console.log(favDiningHallMeals)
+
+		let final : any = {}
+
+		for (let mealPeriod in mealPeriodsToDH) {
+			let random = Math.floor(Math.random()*mealPeriodsToDH[mealPeriod].length)
+			let randomDH = mealPeriodsToDH[mealPeriod][random]
+			random = Math.floor(Math.random()*favDiningHallMeals[randomDH][mealPeriod].length)
+			final[mealPeriod] = favDiningHallMeals[randomDH][mealPeriod][random]
+		}
+
+		let result : any = {
+			user: currentUser,
+			startDate: moment().format(dateFormat),
+			meals: final
+		}
+		return { resp: result, code: 200 }
+	},
+	true
 );
