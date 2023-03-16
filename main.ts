@@ -4,6 +4,7 @@ import express, { Express } from "express";
 import mongoose from "mongoose";
 import { getActivityLevels } from "./activity-scraping";
 import { runScraper } from "./scraper";
+import { sendNotifications } from "./notification";
 
 export declare let app: Express;
 app = express();
@@ -19,6 +20,10 @@ async function main() {
 
 	setInterval(async () => {
 		await getActivityLevels()
+	}, 1000 * 60)
+
+	setInterval(async () => {
+		await sendNotifications()
 	}, 1000 * 60)
 
 	setInterval(async () => {
