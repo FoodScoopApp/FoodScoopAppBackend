@@ -66,7 +66,7 @@ export const runScraper = async () => {
         const diningHalls = [];
 
         // For each meal
-        for (const meal of data) {
+        for (const meal of data["meals"]) {
             try {
                 console.log("Parsing meal " + meal.mealID);
                 // If there is no meal ID in the database, create one
