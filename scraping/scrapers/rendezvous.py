@@ -37,10 +37,12 @@ def scrape_rendezvous():
         for i in div.find_all(class_="menu-item"):
             meal_list.append(build_menu_item(i,"RE",["dinner"],
                                              dateObject.strftime('%Y-%m-%d')))
-    for i in east.find("h4", string="Saturday & Sunday (All Day):").parent.find_all(class_="menu-item"):
-        for (day, dateObject) in weekends.items():
-            meal_list.append(build_menu_item(i,"RE",["lunch","dinner"],
-                                             dateObject.strftime('%Y-%m-%d')))
+    for i in east.find("h4", string="Saturday (All Day):").parent.find_all(class_="menu-item"):
+        meal_list.append(build_menu_item(i,"RE",["lunch","dinner"],
+                                            saturday.strftime('%Y-%m-%d')))
+    for i in east.find("h4", string="Sunday (All Day):").parent.find_all(class_="menu-item"):
+        meal_list.append(build_menu_item(i,"RE",["lunch","dinner"],
+                                            sunday.strftime('%Y-%m-%d')))
     for i in east.find("h2", string="Weekday Lunch Specials").parent.find_all(class_="menu-item"):
         for (day, dateObject) in weekdays.items():
             meal_list.append(build_menu_item(i,"RE",["lunch"],
