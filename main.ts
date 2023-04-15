@@ -26,6 +26,7 @@ async function main() {
 		await sendNotifications()
 	}, 1000 * 60)
 
+	runScraper()
 	setInterval(async () => {
 		await runScraper()
 	}, 1000 * 60 * 60)

@@ -25,6 +25,8 @@ saturday = monday+timedelta(5)
 sunday = monday+timedelta(6)
 weekdays = dict(zip(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
                     [monday, tuesday, wednesday, thursday, friday]))
+weekdaysmf = dict(zip(["Monday", "Tuesday", "Wednesday", "Thursday"],
+                    [monday, tuesday, wednesday, thursday]))
 weekends = dict(zip(["Saturday", "Sunday"], [saturday, sunday]))
 
 

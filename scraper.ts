@@ -105,7 +105,7 @@ export const runScraper = async () => {
                         for (let i = 1; i < meal.mealPeriod.length; i++) {
                             const newmeal = structuredClone(meal);
                             newmeal.mealPeriod = meal.mealPeriod[i];
-                            data.push(newmeal);
+                            data["meals"].push(newmeal);
                         }
                     }
                     meal.mealPeriod = meal.mealPeriod[0];
